@@ -8,10 +8,42 @@ use two simultaneously running threads to:
 import machine
 import time
 import _thread
+import json
+import os
+import sys
 
 import project01
 
 # project01.py also needs to be copied to the Pico
+
+is_micropython = sys.implementation.name == "micropython"
+
+if not is_micropython:
+    import os.path
+
+def get_params(param_file: str) -> tuple[float, int]:
+    """Reads parameters from a JSON file."""
+
+    if not is_regular_file(param_file):
+        raise OSError(f"File {param_file} not found")
+
+    with open(param_file, "r") as f:
+        params = json.load(f)
+
+    return params["sample_ms"], params["on_ms"]
+
+def is_regular_file(path: str) -> bool:
+    """Checks if a regular file exists."""
+
+    if not is_micropython:
+        return os.path.isfile(path)
+
+    S_IFREG = 0x8000
+
+    try:
+        return bool(os.stat(path)[0] & S_IFREG)
+    except OSError:
+        return False
 
 
 def photocell_logger(N: int, sample_interval_s: float) -> None:
@@ -61,9 +93,7 @@ def blinker_response_game(N: int) -> None:
     led = machine.Pin("LED", machine.Pin.OUT)
     button = machine.Pin(16, machine.Pin.IN, machine.Pin.PULL_UP)
 
-    # %% please read these parameters from JSON file like project 01 instead of hard-coding
-    sample_ms = 10.0
-    on_ms = 500
+    sample_ms, on_ms = get_params("project02.json")
 
     t: list[float | None] = []
 
@@ -92,3 +122,4 @@ def blinker_response_game(N: int) -> None:
 
 _thread.start_new_thread(photocell_logger, (10, 0.5))
 blinker_response_game(5)
+
