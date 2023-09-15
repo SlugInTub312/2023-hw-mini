@@ -10,3 +10,6 @@ Use a JSON file to store the parameters for the experiment as in the prior exerc
 Have the Pico write the response times to a JSON file along with min, max, average response time and "score" in number of non-misses vs. total light flashes.
 
 Please include that JSON file in your repository as downloaded from the Pico.
+
+
+** Please note that the resulting JSON file has time in terms of milliseconds!
