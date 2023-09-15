@@ -91,11 +91,13 @@ def photocell_logger(N: int, sample_interval_s: float) -> None:
 def blinker_response_game(N: int) -> None:
     # %% setup input and output pins
     led = machine.Pin("LED", machine.Pin.OUT)
-    button = machine.Pin(16, machine.Pin.IN, machine.Pin.PULL_UP)
+    button1 = machine.Pin(16, machine.Pin.IN, machine.Pin.PULL_UP)
+    button2 = machine.Pin(20, machine.Pin.IN, machine.Pin.PULL_UP)
 
     sample_ms, on_ms = get_params("project02.json")
 
-    t: list[float | None] = []
+    t1: list[float | None] = []
+    t2: list[float | None] = []
 
     project01.blinker(3, led)
 
@@ -105,19 +107,24 @@ def blinker_response_game(N: int) -> None:
         led.high()
 
         tic = time.ticks_ms()
-        t0 = None
+        t01 = None
+        t02 = None
         while time.ticks_diff(time.ticks_ms(), tic) < on_ms:
-            if button.value() == 0:
-                t0 = time.ticks_diff(time.ticks_ms(), tic)
+            if button1.value() == 0:
+                t01 = time.ticks_diff(time.ticks_ms(), tic)
                 led.low()
+            if button2.value() == 0:
+                t02 = time.ticks_diff(time.ticks_ms(), tic)
                 break
-        t.append(t0)
+        t1.append(t01)
+        t2.append(t02)
 
         led.low()
 
     project01.blinker(5, led)
 
-    project01.scorer(t)
+    project01.scorer(t1)
+    project01.scorer(t2)
 
 
 _thread.start_new_thread(photocell_logger, (10, 0.5))
