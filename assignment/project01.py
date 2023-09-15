@@ -6,12 +6,37 @@ from machine import Pin
 import time
 import random
 import json
+import os
+import sys
 
+is_micropython = sys.implementation.name == "micropython"
 
-N: int = 5
-sample_ms = 10.0
-on_ms = 500
+if not is_micropython:
+    import os.path
 
+def get_params(param_file: str) -> tuple[int, float, int]:
+    """Reads parameters from a JSON file."""
+
+    if not is_regular_file(param_file):
+        raise OSError(f"File {param_file} not found")
+
+    with open(param_file, "r") as f:
+        params = json.load(f)
+
+    return params["N"], params["sample_ms"], params["on_ms"]
+
+def is_regular_file(path: str) -> bool:
+    """Checks if a regular file exists."""
+
+    if not is_micropython:
+        return os.path.isfile(path)
+
+    S_IFREG = 0x8000
+
+    try:
+        return bool(os.stat(path)[0] & S_IFREG)
+    except OSError:
+        return False
 
 def random_time_interval(tmin: float, tmax: float) -> float:
     """return a random time interval between max and min"""
@@ -73,7 +98,7 @@ def scorer(t: list[int | None]) -> None:
 
 if __name__ == "__main__":
     # using "if __name__" allows us to reuse functions in other script files
-
+    N, sample_ms, on_ms = get_params("project01.json")
     led = Pin("LED", Pin.OUT)
     button = Pin(16, Pin.IN, Pin.PULL_UP)
 
@@ -100,3 +125,4 @@ if __name__ == "__main__":
     blinker(5, led)
 
     scorer(t)
+
