@@ -202,5 +202,4 @@ def blinker_response_game(N: int) -> None:
 
 
 _thread.start_new_thread(photocell_logger, (10, 0.5))
-blinker_response_game(5)
-
+blinker_response_game(10)
